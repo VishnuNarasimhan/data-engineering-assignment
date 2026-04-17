@@ -36,13 +36,13 @@ def run_pipeline():
             print("SKIPPING MESSAGE WITH MISSING FIELD:", error)
             continue
 
-        print("RAW: ", raw)
+        # print("RAW: ", raw)
 
         # Convert the raw JSON string into a Python dictionary.
         try:
             data = parse_message(raw)
             if not data:
-                print("SKIPPING MALFORMED")
+                # print("SKIPPING MALFORMED")
                 continue
         except Exception as error:
             print("FAILED TO PARSE MESSAGE:", error)
@@ -52,25 +52,24 @@ def run_pipeline():
         try:
             transformed = transform(data)
             if not transformed:
-                print("UNKNOWN SCHEMA")
+                # print("UNKNOWN SCHEMA")
                 continue
         except Exception as error:
             print("FAILED TO TRANSFORM MESSAGE:", error)
             continue
 
-        print("TRANSFORMED: ", transformed)
+        #print("TRANSFORMED: ", transformed)
 
         # Keep the message in the queue if saving to DB fails.
         try:
             insert_into_db(transformed)
-            print("INSERTED INTO DB")
+            # print("INSERTED INTO DB")
         except Exception as error:
             print("FAILED TO INSERT INTO DB:", error)
             continue
 
         # Remove the message from SQS after successful DB insert.
-        if delete_message(sqs, receipt_handle):
-            print("DELETED FROM QUEUE")
+        delete_message(sqs, receipt_handle)
 
 if __name__ == "__main__":
     try:

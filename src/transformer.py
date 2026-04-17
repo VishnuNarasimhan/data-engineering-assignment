@@ -6,7 +6,7 @@ def parse_message(raw_message):
         data = json.loads(raw_message)
         return data
     except Exception as e:
-        print("Malformed message: ", raw_message)
+        # print("Malformed message: ", raw_message)
         return None
 
 def transform(data):
