@@ -3,7 +3,7 @@ version: '2.2'
 services:
 
   interview-localstack:
-    image: localstack/localstack
+    image: localstack/localstack:4.14.0
     ports:
       - "4566:4566"
     environment:
@@ -14,4 +14,16 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+
+  
+  interview-postgres:
+    image: "postgres:14"
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: trips
+    volumes:
+      - ./db-data/:/var/lib/postgresql/data/
 
