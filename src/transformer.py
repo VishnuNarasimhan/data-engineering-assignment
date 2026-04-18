@@ -100,7 +100,7 @@ def transform(data):
         # Ignore messages that do not contain trip information.
         return None
     
-    # Return the normalized user and trip data.
+    # Return the normalized user and trip data..
     return {
         "id": user_id,
         "mail": mail,
