@@ -50,7 +50,6 @@ def create_table():
 
         cur.execute(
             '''
-            DROP TABLE IF EXISTS trips;
             CREATE TABLE IF NOT EXISTS trips (
                 id INT,
                 mail TEXT,
