@@ -8,7 +8,7 @@ messages from the queue.
 from consumer import get_sqs_client, receive_messages
 from transformer import parse_message, transform
 from config import QUEUE_URL
-from db import create_table ,insert_into_db
+from db import create_table, insert_into_db
 
 
 def delete_message(sqs, receipt_handle):
@@ -59,13 +59,11 @@ def run_pipeline():
             print("SKIPPING MESSAGE WITH MISSING FIELD:", error)
             continue
 
-        # print("RAW: ", raw)
-
         # Convert the raw JSON string into a Python dictionary.
         try:
             data = parse_message(raw)
             if not data:
-                # print("SKIPPING MALFORMED")
+                delete_message(sqs, receipt_handle)  # Remove unsupported messages from the queue.
                 continue
         except Exception as error:
             print("FAILED TO PARSE MESSAGE:", error)
@@ -75,18 +73,15 @@ def run_pipeline():
         try:
             transformed = transform(data)
             if not transformed:
-                # print("UNKNOWN SCHEMA")
+                delete_message(sqs, receipt_handle)  # Remove unsupported messages from the queue.      
                 continue
         except Exception as error:
             print("FAILED TO TRANSFORM MESSAGE:", error)
             continue
 
-        #print("TRANSFORMED: ", transformed)
-
         # Keep the message in the queue if saving to DB fails.
         try:
             insert_into_db(transformed)
-            # print("INSERTED INTO DB")
         except Exception as error:
             print("FAILED TO INSERT INTO DB:", error)
             continue

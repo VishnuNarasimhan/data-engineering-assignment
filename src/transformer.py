@@ -24,7 +24,6 @@ def parse_message(raw_message):
         return data
     except Exception:
         # Return None when the message is not valid JSON.
-        # print("Malformed message: ", raw_message)
         return None
 
 
