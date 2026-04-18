@@ -1,8 +1,22 @@
+"""Database access helpers for storing transformed trip data.
+
+This module opens PostgreSQL connections, creates the destination trips table,
+and inserts normalized trip records into the database.
+"""
+
 import psycopg2
 from config import DB_PORT, DB_NAME, DB_HOST, DB_USER, DB_PASSWORD
 
-# Open a new PostgreSQL connection using the configured credentials.
+
 def get_connection():
+    """Open a new PostgreSQL connection using configured credentials.
+
+    Returns:
+        psycopg2.extensions.connection: Active PostgreSQL database connection.
+
+    Raises:
+        psycopg2.Error: Raised when the database connection fails.
+    """
     try:
         return psycopg2.connect(
             port=DB_PORT,
@@ -15,7 +29,17 @@ def get_connection():
         print("Database connection error:", error)
         raise
 
+
 def create_table():
+    """Create the trips table in PostgreSQL.
+
+    The table is recreated before use and stores user details, trip endpoints,
+    and trip start/end timestamps. Duplicate trips are prevented by a unique
+    constraint on the user id and trip start date.
+
+    Raises:
+        psycopg2.Error: Raised when table creation fails.
+    """
     conn = None
     cur = None
 
@@ -54,7 +78,17 @@ def create_table():
         if conn:
             conn.close()
 
+
 def insert_into_db(data):
+    """Insert transformed trip data into the trips table.
+
+    Args:
+        data (dict): Normalized trip data returned by the transformer.
+
+    Raises:
+        KeyError: Raised when expected user or trip fields are missing.
+        psycopg2.Error: Raised when PostgreSQL rejects the insert operation.
+    """
     conn = None
     cur = None
 

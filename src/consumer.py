@@ -1,9 +1,24 @@
+"""Consume messages from the configured SQS queue.
+
+This module creates an SQS client using local configuration values and
+retrieves messages from the queue used by the application.
+"""
+
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 from config import REGION, SQS_ENDPOINT, AWS_ACCESS_KEY, AWS_SECRET_KEY, QUEUE_URL
 
-# Create and return an SQS client with configuration.
+
 def get_sqs_client():
+    """Create and return an SQS client with application configuration.
+
+    Returns:
+        botocore.client.SQS: Configured SQS client instance.
+
+    Raises:
+        BotoCoreError: Raised when boto3 fails to create the client.
+        ClientError: Raised when AWS client configuration fails.
+    """
     try:
         return boto3.client(
             "sqs",
@@ -16,8 +31,14 @@ def get_sqs_client():
         print("Failed to create SQS client:", error)
         raise
 
-# Receive messages from the configured SQS queue.
+
 def receive_messages():
+    """Receive messages from the configured SQS queue.
+
+    Returns:
+        list: Messages returned by SQS, or an empty list when no messages are
+        available or when receiving messages fails.
+    """
     try:
         sqs = get_sqs_client()
 

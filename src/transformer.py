@@ -1,17 +1,55 @@
+"""Transform raw trip messages into the normalized database format.
+
+This module parses JSON messages received from SQS and normalizes supported
+trip schemas into the dictionary structure expected by the database layer.
+"""
+
 import datetime
 import json
 
+
 def parse_message(raw_message):
+    """Parse a raw JSON message string.
+
+    Args:
+        raw_message (str): JSON message body received from SQS.
+
+    Returns:
+        dict | None: Parsed message data when the message is valid JSON,
+        otherwise None.
+    """
     # Convert the raw JSON message string into a Python dictionary.
     try:
         data = json.loads(raw_message)
         return data
-    except Exception as e:
+    except Exception:
         # Return None when the message is not valid JSON.
         # print("Malformed message: ", raw_message)
         return None
 
+
 def transform(data):
+    """Normalize supported trip message schemas.
+
+    The transformer supports two input shapes:
+    - route-based messages, where trip endpoints are derived from the first and
+      last route segments.
+    - location-based messages, where trip endpoints are derived from the
+      earliest and latest timestamped locations.
+
+    Args:
+        data (dict): Parsed message containing user details and trip data.
+
+    Returns:
+        dict | None: Normalized user and trip data ready for database
+        insertion, or None when the message does not contain a supported trip
+        schema.
+
+    Raises:
+        KeyError: Raised when required user or trip fields are missing.
+        ValueError: Raised when route datetime strings do not match the
+        expected ``DD/MM/YYYY HH:MM:SS`` format.
+    """
     # Extract common user details from the input message.
     user_id = data["id"]
     mail = data["mail"]

@@ -1,13 +1,26 @@
+"""Run the trip processing pipeline.
+
+This module coordinates message consumption from SQS, JSON parsing, trip
+transformation, database insertion, and deletion of successfully processed
+messages from the queue.
+"""
+
 from consumer import get_sqs_client, receive_messages
 from transformer import parse_message, transform
 from config import QUEUE_URL
 from db import create_table ,insert_into_db
 
-# Ensure the destination table exists before processing messages.
-create_table()
 
-# Delete a message only after it has been processed and saved successfully.
 def delete_message(sqs, receipt_handle):
+    """Delete a processed message from the configured SQS queue.
+
+    Args:
+        sqs: SQS client used to delete the message.
+        receipt_handle (str): Receipt handle for the message to delete.
+
+    Returns:
+        bool: True when the message is deleted successfully, otherwise False.
+    """
     try:
         sqs.delete_message(
             QueueUrl=QUEUE_URL,
@@ -18,7 +31,17 @@ def delete_message(sqs, receipt_handle):
         print("FAILED TO DELETE MESSAGE:", error)
         return False
 
+
 def run_pipeline():
+    """Run one batch of the trip processing pipeline.
+
+    The pipeline receives messages from SQS, parses each message body,
+    transforms supported trip schemas, inserts valid records into PostgreSQL,
+    and deletes messages only after a successful database insert.
+    """
+    # Ensure the destination table exists before processing messages.
+    create_table()
+
     # Connect to SQS and fetch a batch of messages.
     try:
         sqs = get_sqs_client()
